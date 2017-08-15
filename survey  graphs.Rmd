@@ -1,0 +1,74 @@
+---
+title: "Survey graphs"
+author: "Zoe Meers"
+date: "15 August 2017"
+output: html_document
+---
+```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+load("~/6-Nations-Survey-Data-17/lukeCombinedWaves (1).RData")
+SNSD <- fj
+
+SNSD17 <- split.data.frame(SNSD, SNSD$wave)
+SNSD16 <- SNSD17$`2016` 
+
+SNSD17 <- SNSD17$`2017` 
+
+
+library(plotly)
+```
+```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+pie_16_influence_US <- SNSD %>%
+  subset(country=="Australia")%>%
+  group_by(asia_influence_today, wave) %>%
+  summarise(count=n())%>%
+  subset(wave==2016) %>%
+  plot_ly(labels = ~asia_influence_today, values = ~count) %>%
+  add_pie(hole = 0.6) %>%
+  layout(title = "Australia's Perception: Biggest Influence in Asia in 2016",  showlegend = T,
+         xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+         yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+print(pie_16_influence_US)
+#htmlwidgets::saveWidget(pie_16_influence_US, "pie_16_infleunce_US.html")
+```
+```{r,echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+pie_17_influence_US <- SNSD %>%
+  subset(country=="Australia")%>%
+  group_by(asia_influence_today, wave) %>%
+  summarise(count=n())%>%
+  subset(wave==2017) %>%
+  plot_ly(labels = ~asia_influence_today, values = ~count) %>%
+  add_pie(hole = 0.6) %>%
+  layout(title = "Australia's Perception: Biggest Influence in Asia in 2017",  showlegend = T,
+         xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+         yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+print(pie_17_influence_US)
+
+#htmlwidgets::saveWidget(pie_17_influence_US, "pie_17_infleunce_US.html")
+```
+```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+bar_influence_US_all <- SNSD %>%
+  subset(country=="Australia")%>%
+  group_by(asia_influence_today, wave) %>%
+  summarise(count=n())%>%
+  plot_ly(x=~asia_influence_today, 
+          y=~count, type="bar", 
+          frame=~wave) %>%
+  layout(title = "Australia's Perceptions: Which Country is the Biggest Influence in Asia", 
+         xaxis=list(title="Country of Influence"), 
+         yaxis=list(title="Count")) %>%
+  animation_opts(2000, 
+                 easing = "elastic", 
+                 redraw =TRUE) %>%
+  animation_slider(
+    currentvalue = list(prefix = "YEAR ", font = list(color="black",style="bold"))
+  )
+
+print(bar_influence_US_all)
+#htmlwidgets::saveWidget(bar_influence_US_all, "bar_influence_US_all.html")
+
+```
+
+```{r, echo=FALSE}
+htmltools::tagList(list(bar_influence_US_all, pie_16_influence_US, pie_17_influence_US))
+```
+
