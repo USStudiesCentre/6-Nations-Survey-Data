@@ -1,0 +1,1292 @@
+\documentclass[11pt]{article}
+\usepackage{setspace}
+
+\usepackage{array}
+\usepackage{dcolumn}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\newcolumntype{R}{>{\raggedleft\arraybackslash}X}
+
+\usepackage[linkcolor=blue,
+ colorlinks=true,
+ urlcolor=blue,
+ citecolor=blue,
+ pdfauthor={Jackman and Mansillo},
+ pdftitle={6 nation analysis}]{hyperref}
+
+\usepackage{graphicx}
+\usepackage{indentfirst}
+\usepackage{tocloft}
+\usepackage[margin=0.75in]{geometry}
+
+\usepackage{fontspec}
+\setmainfont[Ligatures=TeX,BoldFont={Roboto Bold},ItalicFont={Roboto Regular}]{Roboto Regular}
+
+\usepackage{unicode-math}
+\unimathsetup{math-style=TeX}
+%\DeclareMathVersion{table}
+
+%\usepackage{amsmath}
+%\usepackage{xltxtra}
+
+%\setsansfont[]{Roboto Regular}
+%\setsansfont{Numbers-Claimcheck}
+%\setmathfont[math-style=TeX, version=normal]{TeX Gyre Pagella Math}
+%\setmathfont[math-style=upright, bold-style=upright, version=table]{TeX Gyre Pagella Math}
+
+%\usepackage{etoolbox}
+%\AtBeginEnvironment{tabular}{%
+%   \sffamily
+%   \addfontfeature{Numbers={Monospaced, Lining}}
+%   \mathversion{table}
+%    \XeTeXinterchartokenstate=1
+% \chardef\CharNormal=0
+% \chardef\CharBound=255
+% \newXeTeXintercharclass\CharNumbers
+% \XeTeXcharclass`0=\CharNumbers
+% \XeTeXcharclass`1=\CharNumbers
+% \XeTeXcharclass`2=\CharNumbers
+% \XeTeXcharclass`3=\CharNumbers
+% \XeTeXcharclass`4=\CharNumbers
+% \XeTeXcharclass`5=\CharNumbers
+% \XeTeXcharclass`6=\CharNumbers
+% \XeTeXcharclass`7=\CharNumbers
+% \XeTeXcharclass`8=\CharNumbers
+% \XeTeXcharclass`9=\CharNumbers
+% \newtoks\TokSetfont
+% \TokSetfont={\begingroup\fontspec{Numbers Claimcheck}}
+% \XeTeXinterchartoks\CharNormal\CharNumbers=\TokSetfont
+% \XeTeXinterchartoks\CharBound\CharNumbers=\TokSetfont
+% \XeTeXinterchartoks\CharNumbers\CharNormal={\endgroup}
+% \XeTeXinterchartoks\CharNumbers\CharBound={\endgroup}
+%}
+
+\setmathfont{TeX Gyre Pagella Math}
+\setmathfont[range=\mathup/{num,latin,Latin}]{Roboto Regular}
+\setmathfont[range=\mathit/{num,latin,Latin}]{Roboto Italic}
+\setmathfont[range=\mathbfit/{num,latin,Latin}]{Roboto Bold Italic}
+\setmathfont[range=\mathit/{greek,Greek}]{TeX Gyre Pagella Math}
+\setmathfont[range=\mathbfsfit/{greek,Greek}]{TeX Gyre Pagella Math}
+
+%% section fonts
+\newfontface\sectionFont[Scale=2.5]{Roboto Bold}
+\newfontface\subsectionFont[Scale=1.67]{Roboto Bold}
+\usepackage{sectsty}
+\sectionfont{\sectionFont}
+\subsectionfont{\subsectionFont}
+
+\def\bfv{\ensuremath{\mathbf{v}}}
+
+%% time-stamping
+\usepackage{datetime2}
+\usepackage{fancyhdr}
+
+\pagestyle{fancy}
+\fancyhead{}
+\renewcommand{\headrulewidth}{0pt}
+\cfoot{}
+\rfoot{\footnotesize{Australian data: tables and analysis.  Generated at \DTMnow\ - page \thepage}}
+
+\fancypagestyle{plain}{%
+  \renewcommand{\headrulewidth}{0pt}
+  \fancyhead{}
+  \cfoot{}
+  \rfoot{\footnotesize{Australian data: tables and analysis. Generated at \DTMnow\ - page \thepage}}
+}
+
+\title{\textbf{Australian data: tables and analysis}}
+\author{Simon Jackman and Luke Mansillo}
+\date{\today}
+
+\newcommand{\listVariables}{Variable List}
+\newlistof{vars}{V}{\listVariables}
+
+\begin{document}
+\thispagestyle{empty}
+\maketitle
+\thispagestyle{empty}
+
+\newpage
+
+\setcounter{page}{1}
+\phantomsection
+\listofvars
+
+\newpage
+
+\onehalfspacing
+
+<<echo=FALSE,results="hide">>=
+runTime <- list()
+runTime$start <- Sys.time()
+
+## load my fonts
+source("../../R/fonts.R")
+
+library(knitr)
+opts_chunk$set(concordance=TRUE)
+options(useFancyQuotes="UTF-8",
+        stringsAsFactors=FALSE)
+
+opts_chunk$set(echo=TRUE,
+               tidy=FALSE,
+               keep.blank.line=FALSE,
+               warning=FALSE,
+               fig.keep="first",
+               fig.path="figure/",
+               size="small",
+               dev="quartz_pdf",
+               crop=TRUE,
+               fig.ext="pdf",
+               tidy.opts=list(width.cutoff=70))
+@
+
+<<par-hook,echo=FALSE,results="hide">>=
+knit_hooks$set(pars = function(before, options, envir) {
+  if (before) graphics::par(options$pars)
+})
+
+knit_hooks$set(my.trellis=function(before,options,envir){
+  if(before){
+    require(lattice)
+    require(latticeExtra)
+    require(grid)
+    trellis.par.set(grid.pars=list(lineend="butt",
+                                   fontfamily="avenirCondensed"),
+                    par.main.text=list(just="left",
+                                       x = grid::unit(5, "mm"),
+                                       font=2,
+                                       cex=1.11)
+    )
+  }})
+
+knit_hooks$set(crop=hook_pdfcrop)
+@
+
+<<fonts, include=FALSE>>=
+library(grDevices)
+avenir <- quartzFont(paste("Avenir Next",
+                           c("Regular", "Demi Bold" ,
+                             "Italic", "Demi Bold Italic")))
+
+avenirLight <- quartzFont(paste("Avenir Next",
+                           c("Ultra Light", "Regular" ,
+                             "Ultra Light Italic", "Italic")))
+
+avenirCondensed <- quartzFont(paste("Avenir Next Condensed",
+                           c("Regular", "Demi Bold" ,
+                             "Italic", "Demi Bold Italic")))
+
+avenirLightCondensed <- quartzFont(paste("Avenir Next Condensed",
+                                         c("Ultra Light", "Regular" ,
+                             "Ultra Light Italic", "Italic")))
+
+roboto <- quartzFont(paste("Roboto",
+                           c("Regular","Bold","Italic","Bold Italic")))
+
+robotoCondensed <- quartzFont(paste("Roboto",
+                           c("Condensed","Bold Condensed","Condensed Italic","Bold Condensed Italic")))
+
+quartzFonts(avenir=avenir)
+quartzFonts(avenirCondensed=avenirCondensed)
+quartzFonts(avenirLight=avenirLight)
+quartzFonts(avenirLightCondensed=avenirLightCondensed)
+quartzFonts(roboto=roboto)
+quartzFonts(robotoCondensed=robotoCondensed)
+
+library(ggplot2)
+mytheme <- theme_bw(base_family="robotoCondensed") + 
+  theme(text=element_text(family="robotoCondensed"))
+@
+
+
+<<read,echo=FALSE,results="hide",warning=FALSE,message=FALSE>>=
+load("../../data/working_tables.RData")
+data2017 <- subset(data2017,country=="Australia")
+data2016 <- subset(data2016,country=="Australia")
+@
+
+
+<<pid_australia_recode,echo=FALSE>>=
+data2017$pid4 <- rep("Other",dim(data2017)[1])
+data2017$pid4[data2017$pid_Australia %in% c("Liberal","National")] <- "Coalition"
+data2017$pid4[data2017$pid_Australia=="Labor"] <- "Labor"
+data2017$pid4[data2017$pid_Australia=="Greens"] <- "Greens"
+
+data2016$pid4 <- rep("Other",dim(data2016)[1])
+data2016$pid4[data2016$pid_Australia %in% c("Liberal","National")] <- "Coalition"
+data2016$pid4[data2016$pid_Australia=="Labor"] <- "Labor"
+data2016$pid4[data2016$pid_Australia=="Greens"] <- "Greens"
+@
+
+<<crosswalk,echo=FALSE>>=
+## load correspondence
+correspondence <- read.csv("../../../Ipsos_deliverables/vnames_2016_2017.csv",
+                           stringsAsFactors = FALSE)
+@
+
+\section*{Common variables}
+\addcontentsline{V}{vars}{\Large{\textbf{Common variables}}}
+
+For variables asked in both 2016 and 2017, there are two columns of results per country.
+
+For variables asked only in 2017, a single column of results appears.
+
+\newpage
+
+<<oneways,echo=FALSE,results="asis",fig.keep="all",fig.env="center",fig.width=7.5>>=
+#########################################
+blurb <- "Cell entries are column percentages (may not sum to 100 due to rounding)"
+
+## function for one ways across countries
+oneway <- function(x){
+  fmla <- as.formula(paste("weight ~ ",
+                           x,
+                           sep=""))
+  ## print(fmla)
+  tab <- xtabs(fmla,data=data2017)
+  tab <- round(prop.table(tab)*100)
+  return(list(tab=tab,stats=NULL))
+}
+
+oneway_pid <- function(x){
+    fmla <- as.formula(paste("weight ~ ",
+                           x,
+                           "+ pid4",
+                           sep=""))
+    tab <- xtabs(fmla,data=data2017)
+    foo <- list()
+    foo$tab <- round(100*prop.table(tab,2))
+    foo$stats <- chisq.test(tab)
+    return(foo)
+}
+
+
+get_scale_cols <- function(obj){
+  levs <- levels(obj$x)
+  n <- length(levs)
+  require(RColorBrewer,quietly = TRUE)
+  if(n<9){
+    out <- rev(brewer.pal(n=n,name = "Dark2"))
+  } else {
+    out <- rev(colorRampPalette(brewer.pal(n=11,name="RdBu"))(n))
+  }
+  
+  usa <- grepl(levs,pattern="United States") | grepl(levs,pattern="U\\.S\\.")    
+  if(any(usa) & n > 2){
+    out[usa] <- "#2166AC"
+  }
+  
+  china <- grepl(levs,pattern="China")
+  if(any(china) & n > 2){
+    out[china] <- "#B2182B"
+  }
+  
+  ##likert scale?
+  likertWords <- c("stronger","weaker","Much","Greatly","Very","Neither","moderate",
+                   "Highly","Definitely",
+                   "increased","decreased","about the same","a great deal")
+  likertScale <- any(sapply(likertWords,FUN=function(x){grepl(levs,pattern=x)}))
+  if(likertScale){
+    out <- rev(brewer.pal(n=n,name="Blues"))
+  }
+  
+  ## +us to +china
+  if(any(grepl(levs,pattern="\\+US"))){
+    if(n>11){
+      out <- rev(colorRampPalette(brewer.pal(n=11,name="RdBu"))(n))
+    } else {
+      out <- rev(brewer.pal(n=n,name="RdBu"))
+    }
+    if(length(out)==3){
+      out[1] <- "#2166AC"
+      out[3] <- "#B2182B"
+    }
+  }
+  names(out) <- levs
+  return(out)
+}
+
+oneway_pid_plot <- function(x){
+  fmla <- as.formula(paste("weight ~ ",
+                           x,
+                           "+ pid4",
+                           sep=""))
+  tab <- xtabs(fmla,data=data2017)
+  tab <- 100*prop.table(tab,2)
+  tab <- as.data.frame(tab)
+  tab$pid4 <- factor(tab$pid4,
+                     levels=c("Coalition","Labor","Greens","Other"))
+  
+  ## marginal
+  fmla2 <- as.formula(paste("weight ~ ",
+                            x,
+                            sep=""))
+  tab2 <- xtabs(fmla2,data=data2017)
+  tab2 <- 100*prop.table(tab2)
+  tab2 <- as.data.frame(tab2)
+  tab2$pid4 <- "All"
+  
+  ##print(tab)
+  names(tab)[1] <- "x"
+  names(tab2)[1]   <- "x"
+  
+  tab <- plyr::rbind.fill(tab,tab2)
+  tab$pid4 <- factor(tab$pid4,
+                     levels=c("All","Coalition","Labor","Greens","Other"))
+  ## color scheme
+  scalecols <- get_scale_cols(tab)
+  
+  ## legend layout
+  levs <- levels(tab$x)
+  nlevs <- length(levs)
+  mchar <- max(nchar(levs))
+  nc <- 2
+  if(mchar>40){
+    nc <- 1
+  }
+  if(nlevs<4 & mchar<20){
+    nc <- nlevs
+  }
+  
+  require(ggplot2)
+  p <- ggplot(data=tab,
+              aes(x=pid4,y=Freq,
+                  group=x,fill=x,
+                  label=ifelse(Freq>5,
+                               as.character(round(Freq)),"")
+                  )
+              ) +
+    geom_bar(position="stack",stat="identity") +
+    geom_text(position = position_stack(vjust = 0.5),
+              family="Roboto") +
+    scale_fill_manual(name="",values=scalecols) +
+    guides(fill=guide_legend(ncol=nc)) + 
+    scale_x_discrete("") +
+    scale_y_continuous("",expand=c(0,0)) +
+    theme(text=element_text(family = "Roboto"),
+          legend.position = "bottom",
+          legend.direction="vertical")
+  print(p)
+  return(invisible(NULL))
+}
+
+twoyear_pid_tab <- function(){
+    fmla <- as.formula("weight ~ y + pid + year")
+    tab <- xtabs(fmla,data=tmpData)
+    foo <- list()
+    foo$tab <- tab
+    foo$tab <- round(100*prop.table(tab,c(2,3)))
+    ##foo$stats <- chisq.test(tab)
+    return(foo$tab)
+}
+
+twoyear_pid_plot <- function(){
+  fmla <- as.formula("weight ~ y + pid + year")
+  tab <- xtabs(fmla,data=tmpData)
+  tab <- 100*prop.table(tab,c(2,3))
+  tab <- as.data.frame(tab)
+  tab$x <- tab$y
+  tab$y <- NULL
+  
+  fmla2 <- as.formula("weight ~ y + year")
+  tab2 <- xtabs(fmla2,data=tmpData)
+  tab2 <- 100*prop.table(tab2,2)
+  tab2 <- as.data.frame(tab2)
+  tab2$x <- tab2$y
+  tab2$y <- NULL
+  tab2$pid <- "All"
+  
+  tab <- plyr::rbind.fill(tab,tab2)
+  tab$pid <- factor(tab$pid,
+                     levels=c("All","Coalition","Labor","Greens","Other"))
+  
+  scalecols <- get_scale_cols(tab)
+  
+  ## legend layout
+  levs <- levels(tab$x)
+  nlevs <- length(levs)
+  mchar <- max(nchar(levs))
+  ##cat(paste("mchar:",mchar,"\n"))
+  ##cat(paste("nlevs:",nlevs,"\n"))
+  nc <- 2
+  if(mchar>40){
+    nc <- 1
+  }
+  if(nlevs<4 & mchar<20){
+    nc <- nlevs
+  }
+  
+  require(ggplot2)
+  p <- ggplot(data=tab,
+              aes(x=year,y=Freq,
+                  group=x,fill=x,
+                  label=ifelse(Freq>5,
+                               as.character(round(Freq)),"")
+              )
+  ) +
+    geom_bar(position="stack",stat = "identity") + 
+    geom_text(position = position_stack(vjust = 0.5),
+              family="Roboto") +
+    scale_y_continuous("",expand=c(0,0)) +
+    scale_x_discrete("") +
+    scale_fill_manual(name="",values=scalecols) +
+    guides(fill=guide_legend(ncol=nc)) + 
+    theme(text=element_text(family = "Roboto"),
+          legend.position = "bottom",
+          legend.direction="vertical",
+          legend.key = element_rect(size = 5),
+          legend.key.size = unit(1.5, 'lines')) +
+    facet_grid(~pid)
+  print(p)
+  return(invisible(NULL))
+}
+
+oneway_side_by_side <- function(x){
+  tab <- xtabs(weight~y+year,data=tmpData)
+  ##tab2 <- tab
+  ##tab3 <- tab
+  ##tab3 <- round(prop.table(tab3,2)*100)
+  return(tab)
+}
+
+makeCaption <- function(lab){
+  captionString <- lab
+  return(captionString)
+}
+
+makeTitle <- function(i){
+  nm <- gsub(pattern="_", replacement="\\\\_", v$vname[i])
+  cat(paste("\\pdfbookmark{",
+            nm,
+            "}{",
+            v$vname[i],
+            "}",
+            sep=""))    ## pdf bookmarks
+  cat("\n")
+  cat(paste("\\subsection*{",nm,"}",sep=""))
+  cat("\n")
+  
+  cat(paste("\\large{",
+            theLabel,
+            "}\n",
+            sep=""))
+  cat("\\medskip\n")
+  return(invisible(NULL))
+}
+
+makeTocEntry <- function(nm,theLabel){
+    cat(paste("\\addcontentsline{V}{vars}{",
+            "\\textbf{",nm,"}: ",theLabel,
+            "}\n",
+            sep=""))  ## create TOC entry
+  return(invisible(NULL))
+}
+
+processStats <- function(foo,y="year"){
+  if(is.null(foo$stats)){
+    return(NULL)
+  }
+  
+  nullText <- paste("H$_0$: no association with",y)
+  statsText <- paste("$\\chi^2$~=~",
+                     formatC(foo$stats$statistic,
+                             digits=1,
+                             format="f"),
+                     sep="")
+  if(!is.na(foo$stats$p.value)){
+    if(foo$stats$p.value<.01){
+      pValueText <- "$p$~<~.01."
+    } else {
+      pValueText <- paste("$p$~=~",
+                          round(foo$stats$p.value,2),
+                          ".",sep="")
+    }
+    
+    statsText <- paste(nullText,
+                       statsText,pValueText,
+                       sep=". ")
+  } else {
+    statsText <- NULL
+  }
+  return(statsText)
+}
+
+## this function converts table cells
+## to character should we want to use
+## sanitize functions in xtable
+## to get extra formatting etc
+processTab <- function(tab){
+  a <- as.list(attributes(tab))
+  class(tab) <- "table"
+  z <- as.character(tab)
+  z <- matrix(z,
+              nrow=a$dim[1],
+              ncol=a$dim[2],
+              dimnames=a$dimnames)
+  return(z)
+}
+
+## read variable names and labels
+vname <- read.csv(file="../../../Ipsos_deliverables/vname.csv",stringsAsFactors = FALSE)
+vname_derived <- data.frame(vname=c("harmDiff",
+                                    "harmDiff_fold",
+                                    "country_influenceDiff",
+                                    "country_influenceDiff_fold",
+                                    "country_influence_evalDiff",
+                                    "country_influence_evalDiff_fold",
+                                    "rshipDiff","rshipDiff_fold",
+                                    "tradeDiff","tradeDiff_fold",
+                                    "investDiff","investDiff_fold",                                       
+                                    "milpresenceDiff","milpresenceDiff_fold")) 
+vname_derived$label <- ""
+vname_derived$oneway <- 1
+vname_derived$oneway_country <- NA
+
+vname <- rbind(vname,vname_derived)
+
+vname <- merge(vname,
+               correspondence[,c("label_2016","label_2017","id",
+                                 "vname_2016",
+                                 "vname_2017",
+                                 "wave_2016","wave_2017")],
+               by.x="vname",
+               by.y="vname_2017")
+v <- vname[as.logical(vname$oneway),]
+v <- v[!grepl("^aus",v$vname),]
+v <- v[!is.na(v$vname),]
+
+
+vname$oneway_country[is.na(vname$oneway_country)] <- 0
+v2 <- vname[as.logical(vname$oneway_country),]
+v2 <- v2[!is.na(v2$vname) & grepl(pattern="AUSTRALIA$",v2$label),]
+
+v <- plyr::rbind.fill(v,v2)
+v <- v[order(v$id),]
+n <- dim(v)[1]
+
+## fix for missing alliance_uk in 2016
+ukindex <- v$vname=="alliance_uk"
+v$vname_2016[ukindex] <- NA
+v$label_2016[ukindex] <- NA
+v$label_2017[ukindex] <- "Has a defence agreement with the United States?: United Kingdom"
+
+library(xtable)
+
+## loop over common variables
+for(i in 1:n){
+  flag <- FALSE
+  
+  ## do we have 2016 data?
+  if(v$label_2016[i]!="" & !is.na(v$label_2016[i])){
+    flag <- TRUE
+    tmpData <- rbind(data.frame(y=data2016[[v$vname_2016[i]]],
+                                weight=data2016$weight,
+                                year=2016),
+                     data.frame(y=data2017[[v$vname[i]]],
+                                weight=data2017$weight,
+                                year=2017)
+                     )
+    foo <- list()
+    foo$tab <- oneway_side_by_side(tmpData)
+    foo$stats <- chisq.test(foo$tab)
+    foo$tab <- round(prop.table(foo$tab,2)*100)
+    if(dim(foo$tab)[2]==1){
+      flag <- FALSE   ## we only have 1 column of data 
+    }
+  } else {
+    ## we only have 2017 data
+    foo <- oneway(v$vname[i])
+  }
+  
+  ## name for toc entry
+  nm <- gsub(pattern="_", replacement="\\\\_", v$vname[i])
+  
+  ## label for toc entry and captioning
+  theLabel <- ifelse(v$label_2016[i] != "" & !is.na(v$label_2016[i]),
+                     v$label_2016[i],
+                     v$label_2017[i])
+  
+  makeTitle(i)
+  makeTocEntry(nm,theLabel)
+
+  nrows <- dim(foo$tab)[1]
+
+  alignmentStrings <- list(c("p{1.25in}","r","r"),
+                           c("p{1.25in}","r"))
+  xt <- xtable(foo$tab,
+               digits=0,
+               caption=paste(theLabel,
+                             blurb,
+                             processStats(foo),
+                             sep=". "),
+               align=alignmentStrings[[2-flag]])
+
+    if(flag){ ## have 2016 and 2017
+    colHeaders <- paste(" & ",
+                        paste(paste("\\multicolumn{1}{c}{\\small{",
+                                    as.character(2016:2017),
+                                    "}}",
+                                    sep=""),
+                              collapse=" & "),
+                        "\\\\ \n")
+                        
+    print(xt,
+          include.colnames=FALSE,
+          add.to.row=list(pos=as.list(c(-1,1:nrows)),
+                          command=c(colHeaders,
+                                    rep(" \\\\[2pt]\n",nrows))
+          ),
+          booktabs=TRUE,
+          sanitize.rownames.function=function(string){
+            paste("\\raggedright{",string,"}")
+          },
+          tabular.environment="tabular",
+          latex.environments="center")
+    } else {
+      print(xt,
+            add.to.row=list(pos=as.list(1:nrows),
+                            command=rep(" \\\\[2pt]\n",nrows)
+            ),
+            booktabs=TRUE,
+            sanitize.rownames.function=function(string){
+              paste("\\raggedright{",string,"}")
+            },
+            tabular.environment="tabular",
+            latex.environments="center")
+    }
+
+  ## pid table
+  if(v$label_2016[i]!="" & !is.na(v$label_2016[i])){
+    flag <- TRUE
+    tmpData <- rbind(data.frame(y=data2016[[v$vname_2016[i]]],
+                                pid=data2016$pid4,
+                                weight=data2016$weight,
+                                year=2016),
+                     data.frame(y=data2017[[v$vname[i]]],
+                                pid=data2017$pid4,
+                                weight=data2017$weight,
+                                year=2017)
+                     )
+    tmpData$pid <- factor(tmpData$pid,levels=c("Coalition","Labor","Greens","Other"))
+    foo <- list()
+    foo$tab <- twoyear_pid_tab()
+    foo$tab <- gdata::interleave(t(foo$tab[,,1]),
+                                 t(foo$tab[,,2]))
+    foo$tab <- t(foo$tab)
+    
+    xt <- xtable(foo$tab,digits=0,               
+                 caption=paste(theLabel,
+                               blurb,
+                               sep=". "),
+                 align=c("p{1.25in}","r","r","r","r","r","r","r","r"))
+    colHeaders <- paste(" & ",
+                        paste(paste("\\multicolumn{2}{c}{",
+                                    unique(colnames(foo$tab)),
+                                    "}",
+                                    sep=""),
+                              collapse=" & "),
+                        "\\\\ \n",
+                        " & ",
+                        paste(paste("\\multicolumn{1}{c}{",
+                                    rep(c("2015","2017"),4),
+                                    "}",sep=""),
+                              collapse=" & "),
+                        "\\\\ \n")
+    nrows <- dim(foo$tab)[1]
+    print(xt,
+          include.colnames=FALSE,
+          add.to.row=list(pos=as.list(c(-1,1:nrows)),
+                          command=c(colHeaders,
+                                    rep(" \\\\[2pt]\n",nrows))
+          ),
+          booktabs=TRUE,
+          sanitize.rownames.function=function(string){
+            paste("\\raggedright{",string,"}")
+          },
+          tabular.environment="tabular",
+          latex.environments="center")
+    
+    ## graphical display
+    
+    ## eject page
+    cat("\\clearpage")
+    cat("\n")
+    cat("\\newpage")
+    
+    makeTitle(i)
+    twoyear_pid_plot()
+  } else {
+  foo_pid <- oneway_pid(v$vname[i])
+  xt <- xtable(foo_pid$tab,digits=0,               
+               caption=paste(theLabel,
+                             blurb,
+                             processStats(foo_pid,y="party identification"),
+                             sep=". "),
+               align=c("p{1.25in}","r","r","r","r"))
+  colHeaders <- paste(" & ",
+                      paste(paste("\\multicolumn{1}{c}{",
+                                  colnames(foo_pid$tab),
+                                  "}",
+                                  sep=""),
+                            collapse=" & "),
+                      "\\\\ \n")
+  print(xt,
+        include.colnames=FALSE,
+        add.to.row=list(pos=as.list(c(-1,1:nrows)),
+                        command=c(colHeaders,
+                                  rep(" \\\\[2pt]\n",nrows))
+        ),
+        booktabs=TRUE,
+        sanitize.rownames.function=function(string){
+          paste("\\raggedright{",string,"}")
+        },
+        tabular.environment="tabular",
+        latex.environments="center")
+  
+      ## graphical display
+    ## eject page
+    cat("\\clearpage")
+    cat("\n")
+    cat("\\newpage")
+    makeTitle(i)
+    oneway_pid_plot(v$vname[i])
+  }
+      ## eject page
+    cat("\\clearpage")
+    cat("\n")
+    cat("\\newpage")
+}
+@
+
+% \addtocontents{V}{\vspace{\normalbaselineskip}}
+% \addtocontents{V}{\vspace{\normalbaselineskip}}
+% 
+% \clearpage
+% \newpage
+% 
+% \section*{Country-specific variables}
+% \addcontentsline{V}{vars}{\Large{\textbf{Country-specific variables}}}
+% 
+% For questions asked only in 2017, a single column of results appear.
+% 
+% \newpage
+
+<<country-specific,echo=FALSE,results='asis',eval=FALSE>>=
+oneway_country <- function(x,year=2017){
+  fmla <- as.formula(paste("weight ~ ",
+                           x,
+                           sep=""))
+  ## print(fmla)
+  tab <- xtabs(fmla,
+               data=if(year==2016){
+                 data2016 } 
+               else {
+                 data2017
+               }
+  )
+  tab <- round(prop.table(tab)*100)
+  return(list(tab=tab))
+}
+
+oneway_country_side_by_side <- function(x){
+  tab <- xtabs(weight~y+year,data=tmpData)
+  return(tab)
+}
+
+vname$oneway_country[is.na(vname$oneway_country)] <- 0
+v <- vname[as.logical(vname$oneway_country),]
+v <- v[!is.na(v$vname) & grepl(pattern="AUSTRALIA$",v$label),]
+v <- v[order(v$id),]
+n <- dim(v)[1]
+
+theOnes <- c("pid_Australia","aus_q1")
+
+blurb <- "Cell entries are column percentages (may not sum to 100 due to rounding)"
+
+library(xtable)
+
+for(i in 1:n){
+  
+  flag <- FALSE
+  
+  ## do we have 2016 data?
+  if(v$label_2016[i]!="" & !is.na(v$label_2016[i])){
+    flag <- TRUE
+    tmpData <- rbind(data.frame(y=data2016[[v$vname_2016[i]]],
+                                weight=data2016$weight,
+                                year=2016),
+                     data.frame(y=data2017[[v$vname[i]]],
+                                weight=data2017$weight,
+                                year=2017)
+    )
+    foo <- list()
+    foo$tab <- oneway_country_side_by_side(tmpData)
+    foo$stats <- chisq.test(foo$tab)
+    foo$tab <- round(prop.table(foo$tab,2)*100)
+  } else {
+    ## we only have 2017 data
+    foo <- oneway_country(v$vname[i])
+  }
+  
+  nm <- gsub(pattern="_", replacement="\\\\_", v$vname[i])
+  
+  ## the label
+  theLabel <- ifelse(v$label_2016[i] != "",
+                     v$label_2016[i],
+                     v$label_2017[i])
+  
+  makeTitle(i)
+  makeTocEntry(nm,theLabel)
+  
+  alignmentStrings <- list(c("p{2.5in}","r","r"),
+                           c("p{2.5in}","r"))
+  
+  xt <- xtable(foo$tab,
+               digits=0,
+               caption=gsub(paste(gsub(theLabel,
+                                       pattern="\\.$",
+                                       replacement=""),
+                                  blurb,
+                                  processStats(foo),
+                                  sep=". "),
+                            pattern="\\?[ ]{0,1}\\.",
+                            replacement="\\? "),
+               align=alignmentStrings[[2-flag]])
+  nrows <- dim(foo$tab)[1]
+  print(xt,
+        include.colnames=flag,
+        add.to.row=list(pos=as.list(c(1:nrows)),
+                        command=rep(" \\\\[2pt]\n",nrows)
+        ),
+        booktabs=TRUE,
+        sanitize.rownames.function=function(string){
+          paste("\\raggedright{",string,"}")
+        },
+        tabular.environment="tabular",
+        latex.environments="center")
+  
+  
+  ## pid table
+  foo_pid <- oneway_pid(v$vname[i])
+  xt <- xtable(foo_pid$tab,digits=0,               
+               caption=paste(theLabel,
+                             blurb,
+                             processStats(foo_pid,y="party identification"),
+                             sep=". "),
+               align=c("p{1.25in}","r","r","r","r"))
+  colHeaders <- paste(" & ",
+                      paste(paste("\\multicolumn{1}{c}{",
+                                  colnames(foo_pid$tab),
+                                  "}",
+                                  sep=""),
+                            collapse=" & "),
+                      "\\\\ \n")
+  print(xt,
+        include.colnames=FALSE,
+        add.to.row=list(pos=as.list(c(-1,1:nrows)),
+                        command=c(colHeaders,
+                                  rep(" \\\\[2pt]\n",nrows))
+        ),
+        booktabs=TRUE,
+        sanitize.rownames.function=function(string){
+          paste("\\raggedright{",string,"}")
+        },
+        tabular.environment="tabular",
+        latex.environments="center")
+  
+  
+  ## eject page
+  cat("\\clearpage")
+  cat("\n")
+  cat("\\newpage")
+}
+@
+
+
+\section*{Good vs harm}
+<<good_vs_harm,fig.keep="all",fig.width=7.5>>=
+
+vars <- c("harm_us","harm_china")
+
+diffplot <- function(thisvar){
+  
+  tmpData <- rbind(data.frame(y=data2016[[thisvar]],
+                              pid=data2016$pid4,
+                              weight=data2016$weight,
+                              year=2016),
+                   data.frame(y=data2017[[thisvar]],
+                              pid=data2017$pid4,
+                              weight=data2017$weight,
+                              year=2017))
+  
+  levels(tmpData$y) <- list("Good > Harm" = c("Much more good than harm",
+                                              "Somewhat more good than harm"),
+                            "Same" = "About the same amounts of good and harm",
+                            "Harm > Good" = c("Somewhat more harm than good",
+                                              "Much more harm than good")) 
+  
+  fmla <- as.formula("weight ~ y + pid + year")
+  tab <- xtabs(fmla,data=tmpData)
+  tab <- 100*prop.table(tab,c(2,3))
+  tab <- as.data.frame(tab)
+  tab$x <- tab$y
+  tab$y <- NULL
+  
+  fmla2 <- as.formula("weight ~ y + year")
+  tab2 <- xtabs(fmla2,data=tmpData)
+  tab2 <- 100*prop.table(tab2,2)
+  tab2 <- as.data.frame(tab2)
+  tab2$x <- tab2$y
+  tab2$y <- NULL
+  tab2$pid <- "All"
+  
+  tab <- plyr::rbind.fill(tab,tab2)
+  tab$pid <- factor(tab$pid,
+                     levels=c("All","Coalition","Labor","Greens","Other"))
+  
+  library(reshape2)
+  tab2 <- dcast(tab,pid + year ~ x,value.var = "Freq")
+  tab2$net <- tab2[["Good > Harm"]] - tab2[["Harm > Good"]]
+  
+  require(ggplot2)
+  p <- ggplot(data=tab2,
+              aes(y=net,x=year,label=round(net))) + 
+    geom_bar(stat="identity",position="dodge") +
+    geom_text(position=position_stack(vjust=0.5),
+              color="white",
+              family="Roboto") +
+    scale_y_continuous("Net positive") +
+    scale_x_discrete("") +
+    facet_grid(~pid) +
+    theme(text=element_text(family="Roboto"))
+  print(p)
+  return(invisible(NULL))
+}
+
+sapply(vars,diffplot)
+
+diffplot2 <- function(thisvar){
+  
+  tmpData <- rbind(data.frame(y=data2016[[thisvar]],
+                              pid=data2016$pid4,
+                              weight=data2016$weight,
+                              year=2016),
+                   data.frame(y=data2017[[thisvar]],
+                              pid=data2017$pid4,
+                              weight=data2017$weight,
+                              year=2017))
+  
+  levels(tmpData$y) <- list("Positive" = c("Very positive","Positive","A little positive"),
+                            "Same" = "Neither positive nor negative",
+                            "Negative" = c("A little negative","Negative","Very negative"))
+  
+  fmla <- as.formula("weight ~ y + pid + year")
+  tab <- xtabs(fmla,data=tmpData)
+  tab <- 100*prop.table(tab,c(2,3))
+  tab <- as.data.frame(tab)
+  tab$x <- tab$y
+  tab$y <- NULL
+  
+  fmla2 <- as.formula("weight ~ y + year")
+  tab2 <- xtabs(fmla2,data=tmpData)
+  tab2 <- 100*prop.table(tab2,2)
+  tab2 <- as.data.frame(tab2)
+  tab2$x <- tab2$y
+  tab2$y <- NULL
+  tab2$pid <- "All"
+  
+  tab <- plyr::rbind.fill(tab,tab2)
+  tab$pid <- factor(tab$pid,
+                     levels=c("All","Coalition","Labor","Greens","Other"))
+  
+  library(reshape2)
+  tab2 <- dcast(tab,pid + year ~ x,value.var = "Freq")
+  tab2$net <- tab2[["Positive"]] - tab2[["Negative"]]
+  
+  require(ggplot2)
+  p <- ggplot(data=tab2,
+              aes(y=net,x=year,label=round(net))) + 
+    geom_bar(stat="identity",position="dodge") +
+    geom_text(position=position_stack(vjust=0.5),
+              color="white",
+              family="Roboto") +
+    scale_y_continuous("Net positive") +
+    scale_x_discrete("") +
+    facet_grid(~pid) +
+    theme(text=element_text(family="Roboto"))
+  print(p)
+  return(invisible(NULL))
+}
+
+thevars <- c("country_influence_us_eval","country_influence_china_eval")
+sapply(thevars,diffplot2)
+@
+
+
+% \section*{One off tables}
+% 
+% Luke:  a list of tables to make would be
+% 
+% \begin{enumerate}
+% \item ausq1 by ausq2 for both 2016 and 2017
+% \item loess smooths of age on some US/China differentials
+% 
+% \end{enumerate}
+
+<<age_gam,fig.keep="all">>=
+gfitter <- function(obj,outcome){
+    require(mgcv)
+  m <- gam(I(y==outcome)  ~ s(age),
+           data=obj,
+           weight=weight,
+           family=binomial)  
+  newdata <- data.frame(age=18:85)
+  newdata$p <- predict(m,newdata=newdata,type="response")
+  return(newdata)
+}
+
+gfunc <- function(thisvar){
+  tmpData <- rbind(data.frame(y=data2016[[thisvar]],
+                              pid=data2016$pid4,
+                              weight=data2016$weight,
+                              age=2015-as.numeric(data2016$birthyr),
+                              year=2016),
+                   data.frame(y=data2017[[thisvar]],
+                              pid=data2017$pid4,
+                              weight=data2017$weight,
+                              age=2017-as.numeric(data2017$birthyr),
+                              year=2017))
+  
+  levels(tmpData$y) <- list("Positive" = c("Very positive",
+                                           "Positive",
+                                           "A little positive"),
+                            "Same" = "Neither positive nor negative",
+                            "Negative" = c("A little negative",
+                                           "Negative","
+                                           Very negative"))
+  
+  require(plyr)
+  d1 <- ddply(tmpData,
+             .(year),
+             gfitter,
+             outcome="Positive")
+  d1$outcome <- "Positive"
+  
+  d2 <- ddply(tmpData,
+              .(year),
+              gfitter,
+              outcome="Negative")
+  d2$outcome <- "Negative"
+  
+  d3 <- ddply(tmpData,
+              .(year),
+              gfitter,
+              outcome="Same")
+  d3$outcome <- "Same"
+  
+  d <- rbind.fill(d1,d2,d3)
+  d <- ddply(d,.(year,age),mutate,p2=p/sum(p))
+  return(d)
+}
+
+d1 <- gfunc("country_influence_us_eval")
+d1$target <- "US"
+
+d2 <- gfunc("country_influence_china_eval")
+d2$target <- "China"
+
+library(ggplot2)
+ggplot(data=d1,
+       aes(x=age,y=p2,group=outcome,color=outcome)) +
+  geom_line() +
+  facet_grid(~year) +
+  scale_x_continuous("") +
+  scale_y_continuous("") +
+  theme(legend.position = "bottom")
+
+library(ggplot2)
+ggplot(data=d2,
+       aes(x=age,y=p2,group=outcome,color=outcome)) +
+  geom_line() +
+  facet_grid(~year) +
+  scale_x_continuous("") +
+  scale_y_continuous("") +
+  theme(legend.position = "bottom")
+
+d <- rbind.fill(d1,d2)
+ggplot(data=subset(d,outcome=="Positive"),
+       aes(x=age,y=p,group=target,colour=target)) +
+  geom_line() +
+  facet_grid(~year)
+
+d <- rbind.fill(d1,d2)
+ggplot(data=subset(d,outcome=="Negative"),
+       aes(x=age,y=p,group=target,colour=target)) +
+  geom_line() +
+  facet_grid(~year)
+
+## tmpData
+tmpData <- rbind(data.frame(y1=data2016$country_influence_evalDiff_fold=="+US",
+                            y2=data2016$harmDiff_fold=="+US",
+                            pid=data2016$pid4,
+                            weight=data2016$weight,
+                            age=2015-as.numeric(data2016$birthyr),
+                            year="2016"),
+                 data.frame(y1=data2017$country_influence_evalDiff_fold=="+US",
+                            y2=data2017$harmDiff_fold=="+US",
+                            pid=data2017$pid4,
+                            weight=data2017$weight,
+                            age=2017-as.numeric(data2017$birthyr),
+                            year="2017"))
+  
+gfitter <- function(obj){
+    require(mgcv)
+  m <- gam(y1 ~ s(age),
+           data=obj,
+           weight=weight,
+           family=binomial)  
+  newdata <- data.frame(age=18:85)
+  newdata$p <- predict(m,newdata=newdata,type="response")
+  return(newdata)
+}
+
+d <- gfitter(tmpData)
+ggplot(data=d,       
+       aes(x=age,y=p)) +
+  geom_line() +
+  theme(legend.position = "bottom")
+
+@
+
+<<democracy_importance_age>>=
+tmpData <- data.frame(y=data2017$democracy_importance==10,
+                      z=data2017$democracy_importance,
+                      pid=data2017$pid4,
+                      weight=data2017$weight,
+                      age=2017-as.numeric(data2017$birthyr),
+                      year="2017")
+
+d <- gam(y~s(age),
+         data=tmpData,
+         weight=weight,
+         family=binomial)
+newdata <- data.frame(age=18:85)
+newdata$p <- predict(d,newdata=newdata,type="response")*100
+ggplot(data=newdata,aes(x=age,y=p)) +
+  geom_line(size=3) +
+  scale_x_continuous("Age") +
+  scale_y_continuous("Percentage giving rating of 10",
+                     limits = c(0,100),
+                     expand=c(0,0))
+
+d <- gam(z~s(age),
+         data=tmpData,
+         weight=weight,
+         family=gaussian)
+newdata <- data.frame(age=18:85)
+newdata$p <- predict(d,newdata=newdata,type="response")
+ggplot(data=newdata,aes(x=age,y=p)) +
+  geom_line() +
+  scale_x_continuous("Age") +
+  scale_y_continuous("Average Rating",
+                     limits = c(0,10),
+                     expand=c(0,0))
+
+@
+
+<<scale_measure>>=
+vars <- data.frame(us_influence=as.numeric(data2017$asia_influence=="United States"),
+                   china_influence=as.numeric(data2017$asia_influence=="China"),
+                   usinfluence_10=as.numeric(data2017$asia_influence_10=="United States"),
+                   china_influence_10=as.numeric(data2017$asia_influence_10=="China"),
+                   asia_us_influence10=unclass(data2017$asia_us_influence10),
+                   harm_us=unclass(data2017$harm_us),
+                   harm_china=unclass(data2017$harm_china),
+                   country_influence_us=unclass(data2017$country_influence_us),
+                   country_influence_china=unclass(data2017$country_influence_china),
+                   country_influence_us_eval=unclass(data2017$country_influence_us_eval),
+                   country_influence_china_eval=unclass(data2017$country_influence_china_eval),
+                   setrules_which_us=as.numeric(data2017$setrules_which=="The United States"),
+                   rship_us=unclass(data2017$rship_us),
+                   rship_china=unclass(data2017$rship_china),
+                   trade_us=unclass(data2017$trade_us),
+                   trade_china=unclass(data2017$trade_china),
+                   investment_china=unclass(data2017$china_investment),
+                   investment_us=unclass(data2017$us_investment),
+                   milpresence_us=unclass(data2017$us_milpresence),
+                   milpresence_china=unclass(data2017$china_milpresence),
+                   us_conflict=as.numeric(data2017$start_conflict=="United States"),
+                   china_conflict=as.numeric(data2017$start_conflict=="China"),
+                   uni=unclass(data2017$uni),
+                   best_years=unclass(data2017$best_years),
+                   us_lazy=unclass(data2017$stereotype_us_lazy),
+                   china_lazy=unclass(data2017$stereotype_chi_lazy),
+                   us_intelligent=unclass(data2017$stereotype_us_intelligent),
+                   china_intelligent=unclass(data2017$stereotype_chi_intelligent),
+                   us_peaceful=unclass(data2017$stereotype_us_peaceful),
+                   china_peaceful=unclass(data2017$stereotype_chi_peaceful))
+
+vars <- lapply(vars,as.numeric)
+vars <- as.data.frame(vars)
+r <- cor(vars)
+e <- eigen(r)
+plot(e$values)
+f2 <- factanal(x=vars,factors = 2,scores = "Bartlett")
+
+scores <- as.data.frame(f2$scores)
+scores$Factor1 <- -1*scores$Factor1
+scores$pid4 <- data2017$pid4
+scores$weight <- data2017$weight
+scores$age <- 2017 - as.numeric(data2017$birthyr)
+
+
+## standardize scores
+scores$Factor1 <- as.numeric(scale(scores$Factor1,center = TRUE))
+scores$Factor2 <- as.numeric(scale(scores$Factor2,center = TRUE))
+
+library(ggplot2)
+ggplot(data=scores,aes(x=Factor1,y=Factor2,color=pid4)) +
+  geom_vline(xintercept = 0) +
+  geom_hline(yintercept = 0) +
+  geom_point() +
+  geom_density2d() +
+  facet_wrap(~pid4) +
+  scale_x_continuous("") +
+  scale_y_continuous("")
+
+
+d <- ddply(scores,.(pid4),summarise,
+           m1=sum(weight*Factor1)/sum(weight),
+           m2=sum(weight*Factor2)/sum(weight))
+lims <- max(abs(d$m1),abs(d$m2))
+lims <- c(-1,1)*lims
+ggplot(d,aes(x=m1,y=m2,fill=pid4,label=pid4)) +
+  scale_fill_manual(values = c("Coalition"="blue",
+                               "Labor"="red",
+                               "Greens"="darkgreen",
+                               "Other"="orange")) +
+  guides(fill="none") +
+  geom_text(vjust="bottom",
+            nudge_y = .03,
+            family="Roboto") +
+  geom_vline(xintercept = 0) +
+  geom_hline(yintercept = 0) +
+  geom_point(size=8,shape=22) +
+  scale_x_continuous("Pro-United States",limits = lims) +
+  scale_y_continuous("Pro-China",limits=lims) +
+  theme(text=element_text(family="Roboto"))
+
+ggplot(data=scores,
+       aes(x=age,y=Factor1,
+           weight=weight)) +
+  geom_point() +
+  geom_smooth(method="gam",method.args=list(weight=scores$weight)) +
+  facet_wrap(~pid4)
+                   
+                   
+@
+
+
+
+\end{document}
