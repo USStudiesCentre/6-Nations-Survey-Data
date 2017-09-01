@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+  <head>
+
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="generator" content="pandoc" />
+
+    
+        <meta name="date" content="2017-05-30" />
+    
+    <title>Methodological notes</title>
+
+        <script src="methodology_files/jquery-1.11.3/jquery.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="methodology_files/bootstrap3-3.2.0/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="methodology_files/bootstrap3-3.2.0/css/themes/simplex/bootstrap.min.css" rel="stylesheet" />
+    <script src="methodology_files/bootstrap3-3.2.0/js/bootstrap.min.js"></script>
+    <link href="methodology_files/highlightjs-8.2/highlight/default.css" rel="stylesheet" />
+    <script src="methodology_files/highlightjs-8.2/highlight.pack.js"></script>
+    <link href="methodology_files/MagnificPopup-0.9.9/magnific-popup.css" rel="stylesheet" />
+    <script src="methodology_files/MagnificPopup-0.9.9/magnific-popup.js"></script>
+    <script src="methodology_files/Navigation-1.1/tabsets.js"></script>
+    <link href="methodology_files/knitrBootstrap-0.0.1/css/knitrBootstrap.css" rel="stylesheet" />
+    <script src="methodology_files/knitrBootstrap-0.0.1/js/knitrBootstrap.js"></script>
+    
+        <link rel="stylesheet" href="css/ussc_fonts.css" type="text/css" />
+    
+  </head>
+
+  <body data-spy="scroll" data-target="#toc">
+    <div id="wrapper" class="container">
+      <div class="row">
+        <div class="contents col-xs-12 col-md-10">
+
+          
+                    <div class="page-header">
+            <h1 class="title">Methodological notes</h1>
+                                                <h4 class="author"><em>Simon Jackman</em></h4>
+                        <address class="author_afil">
+              United States Studies Centre, University of Sydney<br>                                                                <h4 class="date"><em>30 May 2017</em></h4>
+                      </div>
+                    
+<div class="container-fluid"><div id="load data" class="row"></div></div><div id="survey-administration" class="section level2"><h2>Survey administration</h2><p>Balancing costs and population coverage led us to employ different survey modes across the six countries:</p><table><thead><tr class="header"><th align="left">country</th><th align="left">mode</th><th>completed interviews</th></tr></thead><tbody><tr class="odd"><td align="left">Australia</td><td align="left">self-administered, Internet</td><td>750</td></tr><tr class="even"><td align="left">China</td><td align="left">computer-assisted live interviewers, phone</td><td>750</td></tr><tr class="odd"><td align="left">India</td><td align="left">in-person interview</td><td>908</td></tr><tr class="even"><td align="left">Indonesia</td><td align="left">in-person interview</td><td>750</td></tr><tr class="odd"><td align="left">Japan</td><td align="left">self-administered, Internet</td><td>788</td></tr><tr class="even"><td align="left">Korea</td><td align="left">self-administered, Internet</td><td>757</td></tr></tbody></table></div><div id="sample-design" class="section level2"><h2>Sample design</h2><p>In each country the study aims to make inferences with respect to the resident, adult population of each country.</p><p>In Australia, Japan and Korea, on-line respondents were randomly selected for interviewing from panels of adults who have previously agreed to take surveys.</p><p>In China, phone interviews were conducted utilizing RDD methods in Beijing, Shanghai, Guangzhou, Chengu and Wuhan.</p><p>In India, in-person interviews were conducted in Bangalore, Ahmedabad, Jaipur, Chennai-Coimbatore, Bhubaneshwar, Delhi, Indore, Kolkata, Lucknow, Ludhiana, Mumbai, Patna, Pune and Hyderabad.</p><p>In Indonesia, in-person interviews were conducted in Jakarta, Surabaya, Medan, Bandung and Makassar.</p><hr /></div><div id="stratification-and-weighting" class="section level2"><h2>Stratification and weighting</h2><p>Quotas were employed to help ensure the representativeness of the samples. Demographic attributes used to specify quotas were:</p><ul><li><strong>Australia, Japan and Korea</strong>: Gender, age, education and location/region. “Interlocking” quotas were formed from the cross-classification of these demographic variables.</li><li><strong>China</strong>: interlocking quotas formed from the cross-classification of gender, age and education.</li><li><strong>Indonesia</strong>: interlocking quotas formed from the cross-classification of gender, age and a measure of socio-economic status based on household income, water source and electricity use.</li><li><strong>India</strong>: interlocking quotas formed from the cross-classification of gender, age and a measure of socio-economic status based on household income and ownership of durable goods and vehicles.</li></ul><p>The data files for each country come equipped with weights, resulting from adjustments made to adjust quotas that are over or under target. Unless other- wise stated, all analyses reported in this report (including all tables and graphs) use weights. The following graph displays the distribution of weights for each of the six countries in the analysis. Note that each country’s weights have mean one, by construction. The weights for Indonesia, Japan and China have low variance; the weights for India have considerable variation and the weights for Australia also display a moderate degree of variation.</p><div class="container-fluid"><div class="row"><div class="row"><div class="figure col-md-offset-3 col-md-6"><p><a href="#" class="thumbnail"><img src="methodology_files/figure-html/unnamed-chunk-1-1.png" alt=""></img> </a></p></div></div></div></div><p>As the variance of the weights increases, the more the raw, unweighted data depart from a unbiased sample of the population. There is a cost to remediating bias via weighting. For data that have been weighted, accompanying margins of error are inflated relative to those that would be obtained had the data been a simple random sample; the “variance inflation factor” is proportional to the variance of the weights; n.b., for a simple random sample, the weights would be all 1.0 (with variance zero, since they are constant) and conventional estimates of sampling variability need no adjustment, nor do the resulting margins of error.</p><p>To a reasonable approximation, conventional estimates of sampling variability in each country ought to be inflated by the “variance inflation factor” in the table, below. The nominal sample size is simply the number of completed cases; the “effective sample size” is the equivalent size of a simple random sample with the same sampling variability as that of the weighted data. For India — where the data were weighted considerably — the nominal sample size of 908 generally has the same statistical precision as a simple random sample of size 593.</p><div class="container-fluid"><div id="dsum" class="row"><table><thead><tr class="header"><th align="left">Country</th><th align="left">Variance Inflation</th><th align="left">Completed Cases</th><th align="left">Effective Sample</th></tr></thead><tbody><tr class="odd"><td align="left">Australia</td><td align="left">1.18</td><td align="left">750</td><td align="left">634</td></tr><tr class="even"><td align="left">China</td><td align="left">1.05</td><td align="left">750</td><td align="left">712</td></tr><tr class="odd"><td align="left">India</td><td align="left">1.53</td><td align="left">908</td><td align="left">593</td></tr><tr class="even"><td align="left">Indonesia</td><td align="left">1.03</td><td align="left">750</td><td align="left">729</td></tr><tr class="odd"><td align="left">Japan</td><td align="left">1.01</td><td align="left">788</td><td align="left">783</td></tr><tr class="even"><td align="left">Korea</td><td align="left">1.18</td><td align="left">757</td><td align="left">641</td></tr></tbody></table></div></div><p>Relative to a simple random sample, margins of error for each of the weighted data sets are inflated by the square root of variance inflation term. The following figure demonstrates the margins of error that accompany an estimated proportion in each country. Sampling variability is always maximized for an estimate of 50%; this follows from the fact that for a simple random sample, the variance of an estimated proportion <span class="math inline">\(p\)</span> is <span class="math inline">\(V(p) = p(1-p)/n\)</span> where <span class="math inline">\(n\)</span> is the sample size, an expression that is maximized with <span class="math inline">\(p = .5\)</span>. The use of weighting in these data means that the maximuim margin of error in these data is given by the maximum of the red curve for each country.</p><div class="container-fluid"><div id="moe" class="row"><div class="row"><div id="fig:moe" class="figure col-md-offset-3 col-md-6"><p><a href="#" class="thumbnail"><img src="methodology_files/figure-html/moe-1.png" alt=""></img> </a></p></div></div></div></div>The maximum margins of error, by country, are given in the following table:<div class="container-fluid"><div id="mmoe" class="row"><table><thead><tr class="header"><th align="left">Country</th><th align="left">Max MOE (percentage points)</th></tr></thead><tbody><tr class="odd"><td align="left">Australia</td><td align="left">3.9</td></tr><tr class="even"><td align="left">China</td><td align="left">3.7</td></tr><tr class="odd"><td align="left">India</td><td align="left">4.0</td></tr><tr class="even"><td align="left">Indonesia</td><td align="left">3.6</td></tr><tr class="odd"><td align="left">Japan</td><td align="left">3.5</td></tr><tr class="even"><td align="left">Korea</td><td align="left">3.9</td></tr></tbody></table></div></div><hr /></div><div id="field-dates" class="section level2"><h2>Field dates</h2><p>The graph below shows cumulative rates of survey completion for the six countries. The survey was fielded between 21 February 2017 and 22 March 2017. There is good overlap in the field dates across countries, but a clear division between countries utilizing self-completion Internet modes and other modes. Note too that fieldwork in China did not start until 4 March, and concluded on 22 March. Fieldwork started almost at the same time everywhere else.</p><div class="container-fluid"><div class="row"><div class="row"><div class="figure col-md-offset-3 col-md-6"><p><a href="#" class="thumbnail"><img src="methodology_files/figure-html/unnamed-chunk-2-1.png" alt=""></img> </a></p></div></div></div></div><p>In Australia, Japan and Korea – where the survey administration mode was self-complete via Internet – the bulk of the cases clear very rapidly and the rates of completion are smoother than for other modes. Phone and in-person interviewing display distinct time of day effects, more so than self-administered surveys. A brief pause in interviewing on-line is apparent as the prinicpal investigators and the survey vendor reviewed the data from an initial, small set of cases. The on-line surveys also display a small uptick in production at the end of the field period; presumably, this results from a “final push” from the survey vendor to close the survey, recruiting and assigning cases to quotas yet to be adequately filed and meeting the contracted target sample size.</p><!-- The following graph displays the relationship between weights and field date, by country.  This provides some sense of whether under-represented or over-represented groups were more likely to be interviewed earlier or later in the field period; evidence that some groups are "hard to contact" or "hard to fill" quotas is that high weights are obsevered late in the field period.   This is merely an indication of the extent to which the survey vendor was attentive to sample quality over the field period of the respective survey.   --><div class="container-fluid"><div class="row"></div></div></div>
+
+          
+          <p class="text-muted" id="credit">
+            Styled with <a href="https://github.com/jimhester/knitrBootstrap">knitrBootstrap</a>
+          </p>
+
+        </div>
+
+                <div  class="col-md-2">
+          <div class="hidden-print hidden-xs hidden-sm sidebar affix">
+            <div id="toc" class="sidenav well">
+              <ul><li><a href="#survey-administration">Survey administration</a></li><li><a href="#sample-design">Sample design</a></li><li><a href="#stratification-and-weighting">Stratification and weighting</a></li><li><a href="#field-dates">Field dates</a></li></ul>
+            </div>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+
+        <!-- dynamically load mathjax for compatibility with self-contained -->
+    <script>
+      (function () {
+          var script = document.createElement("script");
+          script.type = "text/javascript";
+          script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+          document.getElementsByTagName("head")[0].appendChild(script);
+      })();
+    </script>
+      </body>
+</html>
