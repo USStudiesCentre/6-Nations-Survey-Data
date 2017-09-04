@@ -1,0 +1,280 @@
+---
+title: "Methodological notes"
+author: "Simon Jackman"
+affiliation: "United States Studies Centre, University of Sydney"
+date: "30 May 2017"
+output: 
+  pdf_document
+css: "css/ussc_fonts.css"  
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE,
+                      message = FALSE,
+                      warning = FALSE,
+                      crop=TRUE,
+                      dev="quartz_png",
+                      dpi=600,
+                      fig.ext="png",
+                      fig.height = 6.5,
+                      fig.width = 9.5)
+
+library(grDevices)
+
+univers <- quartzFont(paste("Univers LT Std",
+                            c("55 Roman","65 Bold","45 Light Oblique", "45 Light")))
+
+quartzFonts(univers=univers)
+
+library(ggplot2)
+mytheme <- theme_bw(base_family="univers") + 
+  theme(text=element_text(family="univers"),
+        strip.text = element_text(size=7),
+        axis.title.x = element_text(size=7),
+        axis.text.x = element_text(size = 7),
+        axis.text.y = element_text(size = 7),
+        legend.text = element_text(size=7),
+        legend.title = element_text(size=7),
+        legend.key.size = unit(x = 7,units = "pt"))
+
+library(captioner)
+table_nums <- captioner::captioner(prefix = "Table")
+fig_nums <- captioner::captioner(prefix = "Figure")
+
+f.ref <- function(x) {
+  stringr::str_extract(fig_nums(x), "[^:]*")
+}
+
+ussc_lightBlue <- rgb(0,157,227,maxColorValue = 255)
+ussc_darkBlue <- rgb(28,57,110,maxColorValue = 255)
+ussc_red <- rgb(237,27,53,maxColorValue = 255)
+
+```
+
+```{r load data}
+load("../../data/working_tables.RData")
+load("../../data/vname_simon.RData")
+```
+
+## Survey administration 
+
+Balancing costs and population coverage led us to employ different survey modes across the six countries:
+
+| country     | mode | completed interviews |
+|:---------|:-----|---|
+|Australia| self-administered, Internet | 750 |
+|China    | computer-assisted live interviewers, phone | 750 |
+|India | in-person interview | 908 |
+|Indonesia| in-person interview | 750 |
+|Japan| self-administered, Internet | 788 |
+|Korea| self-administered, Internet | 757 |
+
+## Sample design 
+
+In each country the study aims to make inferences with respect to the resident, adult population of each country.
+
+In Australia, Japan and Korea, on-line respondents were randomly selected for interviewing from panels of adults who have previously agreed to take surveys.
+
+In China, phone interviews were conducted utilizing RDD methods in Beijing, Shanghai, Guangzhou, Chengu and Wuhan.
+
+In India, in-person interviews were conducted in Bangalore, Ahmedabad, Jaipur, Chennai-Coimbatore, Bhubaneshwar, Delhi, Indore, Kolkata, Lucknow, Ludhiana, Mumbai, Patna, Pune and Hyderabad.
+
+In Indonesia, in-person interviews were conducted in Jakarta, Surabaya, Medan, Bandung and Makassar.
+
+---
+
+## Stratification and weighting
+
+Quotas were employed to help ensure the representativeness of the samples.   Demographic attributes used to specify quotas were:
+
+- **Australia, Japan and Korea**: Gender, age, education and location/region.  "Interlocking" quotas were formed from the cross-classification of these demographic variables. 
+- **China**: interlocking quotas formed from the cross-classification of gender, age and education.
+- **Indonesia**: interlocking quotas formed from the cross-classification of gender, age and a measure of  socio-economic status based on household income, water source and electricity use.
+- **India**: interlocking quotas formed from the cross-classification of gender, age and a measure of  socio-economic status based on household income and ownership of durable goods and vehicles.
+
+The data files for each country come equipped with weights, resulting from adjustments made to adjust quotas that are over or under target. Unless other-
+wise stated, all analyses reported in this report (including all tables and graphs) use weights.   The following graph displays the distribution of weights for each of the six countries in the analysis.  Note that each country's weights have mean one, by construction.  The weights for Indonesia, Japan and China have low variance; the weights for India have considerable variation and the weights for Australia also display a moderate degree of variation.  
+
+ 
+
+```{r}
+plotData <- as.data.frame(prop.table(xtabs(~weight+country,data=data2017),2)*100,
+                          stringsAsFactors = FALSE)
+plotData$weight <- as.numeric(plotData$weight)
+
+library(plyr)
+vData <- ddply(data2017,.(country),summarise,v=var(weight))
+
+library(ggplot2)
+a <- ggplot(data=plotData,
+       aes(x=weight,yend=Freq,y=0,xend=weight)) +
+  geom_segment() +
+  geom_text(data=vData,
+            inherit.aes = FALSE,
+            aes(x=4,
+                y=3,
+                label=paste("variance =",
+                            sprintf(v,fmt="%4.3f"))),
+            family="univers",
+            hjust=1) +  
+  facet_wrap(~country,nrow = 2) +
+  scale_x_continuous("Weight",expand=c(0,0)) +
+  scale_y_continuous("Percent of cases",expand=c(0,.02)) 
+
+#+
+ # mytheme
+```
+
+As the variance of the weights increases, the more the raw, unweighted data depart from a unbiased sample of the population.  There is a cost to remediating bias via weighting.  For data that have been weighted, accompanying margins of error are inflated relative to those that would be obtained had the data been a simple random sample; the "variance inflation factor" is proportional to the variance of the weights; n.b., for a simple random sample, the weights would be all 1.0 (with variance zero, since they are constant) and conventional estimates of sampling variability need no adjustment, nor do the resulting margins of error.  
+
+To a reasonable approximation, conventional estimates of sampling variability in each country ought to be inflated by the "variance inflation factor" in the table, below.  The nominal sample size is simply the number of completed cases; the "effective sample size" is the equivalent size of a simple random sample with the same sampling variability as that of the weighted data.   For India --- where the data were weighted considerably --- the nominal sample size of 908 generally has the same statistical precision as a simple random sample of size 593.
+
+
+```{r dsum}
+wfunc <- function(obj,y){
+  m <- Hmisc::wtd.mean(y,weights=obj$weight)
+  n <- sum(obj$weight)
+  w <- obj$weight/sum(obj$weight)
+  sw <- sum(w^2)
+  v0 <- m*(1-m)/n
+  v1 <- m*(1-m)*sw
+  se0 <- sqrt(v0)
+  se1 <- sqrt(v1)
+  return(data.frame(m=m,
+                    v0=v0,
+                    v1=v1,
+                    deff=v1/v0,
+                    n=n,
+                    neff=n/(v1/v0),
+                    sw=sw,
+                    se0=se0,
+                    se1=se1))
+}
+
+d <- list()
+e <- c(expression(obj$asia_influence=="United States"),
+       expression(obj$harm_us %in% c("Much more good than harm","Somewhat more good than harm"))
+       )
+counter <- 1
+for(e0 in e){
+  d[[counter]] <- ddply(data2017,
+           .(country),
+           function(obj){
+             wfunc(obj,y=as.numeric(eval(e0)))
+             }
+           )
+  counter <- counter + 1
+}
+
+x_html <- knitr::kable(d[[1]][,c("country","deff","n","neff")],
+                       col.names=c("Country","Variance Inflation","Completed Cases","Effective Sample"),
+                       align=c("l","l","l","l"),
+                       format.args = list(digits=3))
+
+kableExtra::kable_styling(x_html,bootstrap_options = "responsive",
+                          full_width="false",
+                          position="center")
+
+```
+
+
+Relative to a simple random sample, margins of error for each of the weighted data sets are inflated by the square root of variance inflation term.   The following figure demonstrates the margins of error that accompany an estimated proportion in each country.  Sampling variability is always maximized for an estimate of 50%; this follows from the fact that for a simple random sample, the variance of an estimated proportion $p$ is $V(p) = p(1-p)/n$ where $n$ is the sample size, an expression that is maximized with $p = .5$.   The use of weighting in these data means that the maximuim margin of error in these data is given by the maximum of the red curve for each country.
+
+```{r moe}
+mfunc <- function(obj){
+  n <- sum(obj$weight)
+  w <- obj$weight/n
+  sw <- sum(w^2)
+  m <- seq(.1,.9,.001)
+  p <- m*(1-m)
+  v0 <- m*(1-m)/n
+  v1 <- m*(1-m)*sw
+  se0 <- sqrt(v0)
+  se1 <- sqrt(v1)
+  moe0 <- 1.96*sqrt(v0)*100
+  moe1 <- 1.96*sqrt(v1)*100
+  return(data.frame(m=m,moe0=moe0,moe1=moe1))
+}
+
+plotData <- ddply(data2017,.(country),mfunc)
+plotData <- reshape2::melt(plotData,
+                           id.vars=c("country","m"),
+                           measure.vars=c("moe0","moe1"))
+plotData$variable <- factor(plotData$variable,
+                            levels=c("moe0","moe1"),
+                            labels=c("Raw (assuming simple random sampling)     ",
+                                     "After weighting"))
+library(ggplot2)
+ggplot(data=plotData,
+       aes(x=m*100,y=value,
+           group=variable,color=variable)) +
+  geom_line(size=2,lineend=2) +
+  scale_x_continuous("Percentage") +
+  scale_y_continuous("Margin of Error") +
+  scale_color_manual(name="",values = c(ussc_lightBlue,ussc_red)) +
+  facet_wrap(~country,nrow=2) +
+  #mytheme +
+  theme(legend.position = "top")
+
+```
+
+The maximum margins of error, by country, are given in the following table:
+```{r mmoe}
+mmoe <- ddply(plotData,.(country),summarize,mmoe=max(value))
+knitr::kable(mmoe,
+             align = c("l","l"),
+             format.args = list(digits=2),
+             col.names = c("Country","Max MOE (percentage points)"))
+```
+
+---
+
+## Field dates
+
+The graph below shows cumulative rates of survey completion for the six countries.   The survey was fielded between 21 February 2017 and 22 March 2017.   There is good overlap in the field dates across countries, but a clear division between countries utilizing self-completion Internet modes and other modes.   Note too that fieldwork in China did not start until 4 March, and concluded on 22 March.  Fieldwork started almost at the same time everywhere else.  
+
+
+```{r}
+library(plyr)
+plotData <- data.frame(country=data2017$country,
+                       weight=data2017$weight,
+                       dt=ISOdatetime(1582,10,14,0,0,0) + data2017$Finish_time)
+plotData <- plotData[order(plotData$country,plotData$dt),]
+plotData <- ddply(plotData,
+                  .(country),
+                  function(obj){
+                    out <- obj
+                    n <- dim(obj)[1]
+                    out$y <- (1:n)/n * 100
+                    out$weight <- obj$weight
+                    out <- as.data.frame(out)
+                    return(out)
+                  })
+
+library(ggplot2)
+ggplot(data=plotData,
+       aes(x=dt,y=y)) +
+  geom_step() +
+  facet_wrap(~country,nrow = 2) +
+  scale_x_datetime("",date_breaks="2 week",date_minor_breaks = "1 day") +
+  scale_y_continuous("Percent of interviews") #+ 
+ # mytheme
+```
+
+In Australia, Japan and Korea -- where the survey administration mode was self-complete via Internet -- the bulk of the cases clear very rapidly and the rates of completion are smoother than for other modes.   Phone and in-person interviewing display distinct time of day effects, more so than self-administered surveys. A brief pause in interviewing on-line is apparent as the prinicpal investigators and the survey vendor reviewed the data from an initial, small set of cases.  The on-line surveys also display a small uptick in production at the end of the field period; presumably, this results from a "final push" from the survey vendor to close the survey, recruiting and assigning cases to quotas yet to be adequately filed and meeting the contracted target sample size.
+
+<!-- The following graph displays the relationship between weights and field date, by country.  This provides some sense of whether under-represented or over-represented groups were more likely to be interviewed earlier or later in the field period; evidence that some groups are "hard to contact" or "hard to fill" quotas is that high weights are obsevered late in the field period.   This is merely an indication of the extent to which the survey vendor was attentive to sample quality over the field period of the respective survey.   -->
+
+```{r,eval=FALSE}
+library(ggplot2)
+ggplot(data=plotData,aes(x=dt,y=weight)) +
+  geom_hline(yintercept = 1) +
+  geom_smooth(se = FALSE,size=2,lineend="butt") +
+  facet_wrap(~country,nrow = 2) +
+  scale_x_datetime("",date_breaks="2 weeks",date_minor_breaks = "1 day") +
+  scale_y_continuous("Percent of interviews")# + 
+ # mytheme
+```
+
+  
